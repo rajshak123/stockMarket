@@ -4,15 +4,15 @@
  * This is the first thing users see of our App, at the '/' route
  */
 
-import React, { useEffect, memo } from 'react';
+import React, { useEffect, memo, useState } from 'react';
 import PropTypes from 'prop-types';
-// import { FormattedMessage } from 'react-intl';
+import Select from 'react-select';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-
 import { useInjectReducer } from 'utils/injectReducer';
 import { useInjectSaga } from 'utils/injectSaga';
+
 import {
   makeSelectRepos,
   makeSelectLoading,
@@ -20,59 +20,106 @@ import {
   makeSelectUsername,
 } from './selectors';
 import ChartWithBtn from './chartWithBtn';
-// import ReposList from 'components/ReposList';
-// import AtPrefix from './AtPrefix';
-// import Form from './Form';
-// import Input from './Input';
-// import Section from './Section';
-// import messages from './messages';
-// import { loadRepos } from '../App/actions';
-import { changeUsername, loadRepos } from './actions';
+import PaginationBtn from './paginationButtons';
 
+import { changeUsername, loadRepos } from './actions';
 import reducer from './reducer';
 import saga from './saga';
-import { stockIndexMappingMoneyControl } from './constants';
+import { stockIndexMappingMoneyControl, healthCareMarket } from './constants';
 
 const key = 'home';
 
 export function HomePage({ repos, fetchPriceMoneyControl }) {
   useInjectReducer({ key, reducer });
   useInjectSaga({ key, saga });
-
+  const [sectorDrop, changeSectorDrop] = useState({
+    value: 'energy',
+    label: 'Energy Sector',
+  });
+  const [pageOn, setPageOn] = useState(1);
   useEffect(() => {
-    Object.keys(stockIndexMappingMoneyControl).map(objKey =>
-      fetchPriceMoneyControl(objKey, 'max'),
-    );
-  }, []);
+    if (sectorDrop.value === 'energy') {
+      if (!repos[sectorDrop.value][pageOn]) {
+        Object.keys(stockIndexMappingMoneyControl[pageOn]).map(objKey =>
+          fetchPriceMoneyControl(objKey, 'max', sectorDrop.value, pageOn),
+        );
+      }
+    }
+    if (sectorDrop.value === 'health') {
+      if (!repos[sectorDrop.value][pageOn]) {
+        Object.keys(healthCareMarket[pageOn]).map(objKey =>
+          fetchPriceMoneyControl(objKey, 'max', sectorDrop.value, pageOn),
+        );
+      }
+    }
+  }, [sectorDrop.value, pageOn]);
 
   const getTimeStamp = myDate => {
     const myDate1 = myDate.split('-');
     const newDate = new Date(myDate1[0], myDate1[1] - 1, myDate1[2]);
     return newDate.getTime();
   };
-
+  const mapping = {
+    energy: stockIndexMappingMoneyControl,
+    health: healthCareMarket,
+  };
   const dataWithSymbolId = {};
-  Object.keys(repos).forEach(
-    // eslint-disable-next-line no-return-assign
-    key2 =>
-      // dataWithSymbolId[key2] = {
-      //   data: repos[key2].g1.map(data => [
-      //     getTimeStamp(data.date),
-      //     Number(data.high),
-      //   ]),
-      //   // minDate: repos[key2].g1[0].date,
-      //   // maxDate: repos[key2].g1[repos[key2].g1.length - 1].date,
-      // };
-      (dataWithSymbolId[key2] = repos[key2].g1.map(data => [
-        getTimeStamp(data.date),
-        Number(data.high),
-      ])),
-  );
+  const objWithData =
+    repos[sectorDrop.value][pageOn] &&
+    Object.keys(mapping[sectorDrop.value][pageOn]).length ===
+      Object.keys(repos[sectorDrop.value][pageOn]).length
+      ? repos[sectorDrop.value]
+      : {};
+  // eslint-disable-next-line no-unused-expressions
+  objWithData[pageOn]
+    ? Object.keys(objWithData[pageOn]).forEach(key2 => {
+      return (dataWithSymbolId[key2] = objWithData[pageOn][key2].g1.map(
+        data => [getTimeStamp(data.date), Number(data.high)],
+      ));
+    })
+    : null;
+  const options = [
+    { value: 'energy', label: 'Energy Sector' },
+    { value: 'health', label: 'Healtch Care' },
+  ];
 
+  console.log(
+    'dsjkfh',
+    Object.keys(mapping[sectorDrop.value][pageOn]).length,
+    repos[sectorDrop.value][pageOn]
+      ? Object.keys(repos[sectorDrop.value][pageOn]).length
+      : null,
+    dataWithSymbolId,
+  );
+  const updatePage = val => {
+    setPageOn(val);
+  };
   return (
     <article>
-      <div>
-        <ChartWithBtn propsData={dataWithSymbolId} />
+      <div className="chartCon">
+        <Select
+          value={sectorDrop}
+          onChange={val => {
+            changeSectorDrop(val);
+            setPageOn(1);
+          }}
+          options={options}
+        />
+        <div>
+          <ChartWithBtn
+            propsData={dataWithSymbolId}
+            lengthOfStocks={
+              Object.keys(mapping[sectorDrop.value][pageOn]).length
+            }
+            labelData={mapping[sectorDrop.value][pageOn]}
+          />
+        </div>
+        <div>
+          <PaginationBtn
+            range={Object.keys(mapping[sectorDrop.value]).length}
+            pgnFunc={updatePage}
+          />
+        </div>
       </div>
     </article>
   );
@@ -93,8 +140,8 @@ const mapStateToProps = createStructuredSelector({
 export function mapDispatchToProps(dispatch) {
   return {
     onChangeUsername: evt => dispatch(changeUsername(evt.target.value)),
-    fetchPriceMoneyControl: (id, time) => {
-      dispatch(loadRepos(id, time));
+    fetchPriceMoneyControl: (id, time, dropKey, pageOn) => {
+      dispatch(loadRepos(id, time, dropKey, pageOn));
     },
   };
 }

@@ -21,7 +21,10 @@ export const initialState = {
   error: false,
   // currentUser: false,
   userData: {
-    repositories: {},
+    repositories: {
+      energy: {},
+      health: {},
+    },
   },
 };
 
@@ -36,11 +39,25 @@ const homeReducer = (state = initialState, action) =>
       case LOAD_REPOS:
         draft.loading = true;
         draft.error = false;
-        draft.userData.repositories = {};
+        draft.userData.repositories = {
+          ...draft.userData.repositories,
+        };
         break;
 
       case LOAD_REPOS_SUCCESS:
-        draft.userData.repositories[action.response.id] = action.response.data;
+        console.log(action);
+        draft.userData.repositories = {
+          ...draft.userData.repositories,
+          [action.response.dropKey]: {
+            ...draft.userData.repositories[action.response.dropKey],
+            [action.response.pageOn]: {
+              ...draft.userData.repositories[action.response.dropKey][
+                action.response.pageOn
+              ],
+              [action.response.id]: action.response.data,
+            },
+          },
+        };
         draft.loading = false;
         break;
 

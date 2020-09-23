@@ -19,7 +19,7 @@ import { LOAD_REPOS } from './constants';
  * Github repos request/response handler
  */
 export function* getRepos(evt) {
-  const { payload, time } = evt;
+  const { payload, time, dropKeyp, pageOn } = evt;
   // Select username from store
   // const username = yield select(makeSelectUsername());
   const requestURL = `https://www.moneycontrol.com/mc/widget/basicchart/get_chart_value?classic=true&sc_did=${payload}&dur=${time}`;
@@ -27,7 +27,7 @@ export function* getRepos(evt) {
   try {
     // Call our request helper (see 'utils/request')
     const data = yield call(request, requestURL);
-    yield put(reposLoaded(data, payload));
+    yield put(reposLoaded(data, payload, dropKeyp, pageOn));
   } catch (err) {
     yield put(repoLoadingError(err));
   }

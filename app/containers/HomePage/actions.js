@@ -41,11 +41,13 @@ export function changeUsername(username) {
  *
  * @return {object} An action object with a type of LOAD_REPOS
  */
-export function loadRepos(evt, time = 'max') {
+export function loadRepos(evt, time = 'max', dropKeyp, pageOn) {
   return {
     type: LOAD_REPOS,
     payload: evt,
     time,
+    dropKeyp,
+    pageOn,
   };
 }
 
@@ -57,12 +59,14 @@ export function loadRepos(evt, time = 'max') {
  *
  * @return {object}      An action object with a type of LOAD_REPOS_SUCCESS passing the repos
  */
-export function reposLoaded(responseData, id) {
+export function reposLoaded(responseData, id, dropKey, pageOn) {
   return {
     type: LOAD_REPOS_SUCCESS,
     response: {
       data: responseData,
       id,
+      dropKey,
+      pageOn,
     },
     // responseData,
     // id,
