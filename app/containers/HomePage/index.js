@@ -70,27 +70,31 @@ export function HomePage({ repos, fetchPriceMoneyControl }) {
       Object.keys(repos[sectorDrop.value][pageOn]).length
       ? repos[sectorDrop.value]
       : {};
-  // eslint-disable-next-line no-unused-expressions
-  objWithData[pageOn]
-    ? Object.keys(objWithData[pageOn]).forEach(key2 => {
-      return (dataWithSymbolId[key2] = objWithData[pageOn][key2].g1.map(
-        data => [getTimeStamp(data.date), Number(data.high)],
-      ));
-    })
-    : null;
+  if (objWithData[pageOn]) {
+    Object.keys(objWithData[pageOn]).forEach(
+      // eslint-disable-next-line no-return-assign
+      key2 =>
+        (dataWithSymbolId[key2] = objWithData[pageOn][key2].g1.map(data => [
+          getTimeStamp(data.date),
+          Number(data.high),
+        ])),
+    );
+  }
+
   const options = [
     { value: 'energy', label: 'Energy Sector' },
     { value: 'health', label: 'Healtch Care' },
   ];
 
-  console.log(
-    'dsjkfh',
-    Object.keys(mapping[sectorDrop.value][pageOn]).length,
-    repos[sectorDrop.value][pageOn]
-      ? Object.keys(repos[sectorDrop.value][pageOn]).length
-      : null,
-    dataWithSymbolId,
-  );
+  // console.log(
+  //   'dsjkfh',
+  //   Object.keys(mapping[sectorDrop.value][pageOn]).length,
+  //   repos[sectorDrop.value][pageOn]
+  //     ? Object.keys(repos[sectorDrop.value][pageOn]).length
+  //     : null,
+  //   dataWithSymbolId,
+  //   pageOn,
+  // );
   const updatePage = val => {
     setPageOn(val);
   };

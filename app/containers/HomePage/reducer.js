@@ -45,7 +45,6 @@ const homeReducer = (state = initialState, action) =>
         break;
 
       case LOAD_REPOS_SUCCESS:
-        console.log(action);
         draft.userData.repositories = {
           ...draft.userData.repositories,
           [action.response.dropKey]: {

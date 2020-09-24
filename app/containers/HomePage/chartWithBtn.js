@@ -1,9 +1,9 @@
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'semantic-ui-react';
 import moment from 'moment';
 import LoadingIndicator from 'components/LoadingIndicator';
-import _ from 'lodash';
+// import _ from 'lodash';
 import Chart from '../../components/Chart';
 import { buttonTime, timeSeriesChartOption } from './constants';
 import './colors.scss';
@@ -35,38 +35,29 @@ ChartBtn.propTypes = {
   fetchPricesBasedOnTime: PropTypes.func,
 };
 
-const usePrevious = value => {
-  // The ref object is a generic container whose current property is mutable ...
-  // ... and can hold any value, similar to an instance property on a class
-  const ref = useRef();
-
-  // Store current value in ref
-  useEffect(() => {
-    ref.current = value;
-  }, [value]); // Only re-run if value changes
-
-  // Return previous value (happens before update in useEffect above)
-  return ref.current;
-};
-
 export function ChartWithBtn({ propsData, lengthOfStocks, labelData }) {
   const [dataState, setDataState] = useState({});
   const [staticDataState, staticSetDataState] = useState({});
   let charts = [];
   // setDataState(propsData);
   // staticSetDataState(propsData);
-  const prevDeeplyNestedObject = usePrevious(dataState);
-  useEffect(() => {
-    if (!_.isEqual(prevDeeplyNestedObject, propsData)) {
-      // ...execute your code
-      setDataState(propsData);
-      staticSetDataState(propsData);
-    }
-  }, [propsData, prevDeeplyNestedObject]);
+  // const prevDeeplyNestedObject = usePrevious(dataState);
   // useEffect(() => {
-  //   setDataState(propsData);
-  //   staticSetDataState(propsData);
-  // }, [propsData]);
+  //   if (!_.isEqual(prevDeeplyNestedObject, propsData)) {
+  //     // ...execute your code
+  //     setDataState(propsData);
+  //     staticSetDataState(propsData);
+  //   }
+  // }, [propsData, prevDeeplyNestedObject]);
+  useEffect(() => {
+    // if (!_.isEqual(staticDataState, propsData)) {
+    //   // ...execute your code
+    //   setDataState(propsData);
+    //   staticSetDataState(propsData);
+    // }
+    setDataState(propsData);
+    staticSetDataState(propsData);
+  }, [Object.keys(propsData)[0]]);
   // useEffect(() => {}, [dataState]);
   const getNearestDate = (counts, goal) =>
     counts.reduce((prev, curr) =>
@@ -107,7 +98,9 @@ export function ChartWithBtn({ propsData, lengthOfStocks, labelData }) {
   };
   if (
     lengthOfStocks === Object.keys(dataState).length &&
-    Object.keys(propsData).length !== 0
+    Object.keys(propsData).length !== 0 &&
+    lengthOfStocks &&
+    Object.keys(propsData)[0] === Object.keys(dataState)[0]
   ) {
     charts = Object.keys(dataState).map(ele => {
       const options = {
@@ -140,6 +133,7 @@ export function ChartWithBtn({ propsData, lengthOfStocks, labelData }) {
 ChartWithBtn.propTypes = {
   propsData: PropTypes.object,
   labelData: PropTypes.object,
+  lengthOfStocks: PropTypes.number,
   //   symbolID: PropTypes.string,
   //   fetchPricesBasedOnTime: PropTypes.func,
 };
